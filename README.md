@@ -44,6 +44,20 @@ npm run lint
 npm run lint:fix
 ```
 
+## Routes:
+#### Auth:
+- POST: ```/auth/login``` login with ```{email: 'string', password: 'string'}```
+- GET: ```/auth/logout``` logout
+- POST: ```/auth/signup``` SignUp with ```{email: 'string', password: 'string'}```
+#### Users:
+- GET: ```/user``` get current user
+- GET: ```/user/:userId``` get user by Id
+- GET: ```/users/``` find all users
+#### Posts:
+- POST: ```/posts/``` create new post form user ```{title: 'string', body: 'string'}```
+- GET: ```/posts/:postId``` get posts by Id
+- GET: ```/posts/``` find all posts
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
