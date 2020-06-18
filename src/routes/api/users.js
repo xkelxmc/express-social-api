@@ -1,12 +1,13 @@
 import express from 'express';
-import userControllers from '../../controllers/user';
 import usersControllers from '../../controllers/users';
 
 // eslint-disable-next-line new-cap
 const usersRouter = express.Router();
 
-usersRouter.get('/user/', userControllers.getCurrentUser);
-usersRouter.get('/user/:userId', userControllers.findOne);
-usersRouter.get('/users/', usersControllers.findAll);
+usersRouter.get('/me', (req, res, next) => {
+    return res.status(200).json(req.user);
+});
+usersRouter.get('/:userId', usersControllers.findOne);
+usersRouter.get('/', usersControllers.findAll);
 
 export default usersRouter;

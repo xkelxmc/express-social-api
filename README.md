@@ -54,11 +54,11 @@ npm run lint:fix
 - POST: ```/auth/signup``` 
 SignUp with 
 ```json
-{"email": "string", "password": "string", "name", "string", "lastName": "string"}
+{"email": "string", "password": "string", "name": "string", "lastName": "string"}
 ```
 #### Users:
-- GET: ```/user``` get current user
-- GET: ```/user/:userId``` get user by Id
+- GET: ```/users/me``` get current user
+- GET: ```/users/:userId``` get user by Id
 - GET: ```/users/``` find all users
 #### Posts:
 - POST: ```/posts/``` create new post form user 
@@ -69,10 +69,22 @@ SignUp with
 - GET: ```/posts/``` find all posts
 
 ## API:
+#### Auth:
+- POST: ```/api/auth/login``` login with 
+```json
+{"email": "string", "password": "string"}
+```
+- GET: ```/api/auth/logout``` logout
+- GET: ```/api/auth/logoutall``` logout on all devices
+- POST: ```/api/auth/signup``` 
+SignUp with 
+```json
+{"email": "string", "password": "string", "name": "string", "lastName": "string"}
+```
 With Bearer Authorization
 #### Users:
-- GET: ```/api/user``` get current user
-- GET: ```/api/user/:userId``` get user by Id
+- GET: ```/api/users/me``` get current user
+- GET: ```/api/users/:userId``` get user by Id
 - GET: ```/api/users/``` find all users
 
 ## Contributing

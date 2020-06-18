@@ -27,7 +27,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(authRoutes);
-app.use(usersRouter);
+app.use('/users', usersRouter);
 app.use(postsRouter);
 app.use('/api/', apiRouter);
 

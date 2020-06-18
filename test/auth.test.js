@@ -166,7 +166,7 @@ describe('Create user and login/logout', () => {
             loginUser(dummyUser).end((err2, res2) => {
                 expect(res2.status).to.equal(200);
                 userAgent
-                    .get('/user/')
+                    .get('/users/')
                     .end((err3, res3) => {
                         expect(res3.status).to.equal(200);
                         done();
@@ -180,9 +180,9 @@ describe('Create user and login/logout', () => {
             expect(res1.status).to.equal(200);
             loginUser(dummyUser).end((err2, res2) => {
                 expect(res2.status).to.equal(200);
-                const id = res2.body?.user?._id;
+                const id = res2.body?._id;
                 userAgent
-                    .get(`/user/${id}`)
+                    .get(`/users/${id}`)
                     .end((err3, res3) => {
                         expect(res3.status).to.equal(200);
                         done();
