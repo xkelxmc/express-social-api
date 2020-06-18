@@ -1,6 +1,14 @@
 # Express Social Api
 
 Social Api is an example of a working version of api for a social network on Node Express
+
+##### Used:
+- Express
+- MongoDB
+- Mongoose
+- Babel 7
+- Mocha
+
 ## Installation
 
 ```bash
