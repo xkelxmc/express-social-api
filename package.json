@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon --exec node -r dotenv/config -r @babel/register app.js",
     "test": "mocha -r @babel/register -r dotenv/config -t 10000 --exit",
-    "test:watch": "nodemon --exec npm run test",
+    "test:watch": "nodemon --exec mocha -R progress -r @babel/register -r dotenv/config -t 10000 --exit",
     "lint": "eslint src/** app.js index.js test/**",
     "lint:fix": "eslint --fix src/** app.js index.js test/**"
   },
@@ -21,8 +21,10 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.5.9",
-    "mongoose": "^5.9.19"
+    "mongoose": "^5.9.19",
+    "validator": "^13.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.1",

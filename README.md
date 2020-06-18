@@ -46,17 +46,34 @@ npm run lint:fix
 
 ## Routes:
 #### Auth:
-- POST: ```/auth/login``` login with ```{email: 'string', password: 'string'}```
+- POST: ```/auth/login``` login with 
+```json
+{"email": "string", "password": "string"}
+```
 - GET: ```/auth/logout``` logout
-- POST: ```/auth/signup``` SignUp with ```{email: 'string', password: 'string'}```
+- POST: ```/auth/signup``` 
+SignUp with 
+```json
+{"email": "string", "password": "string", "name", "string", "lastName": "string"}
+```
 #### Users:
 - GET: ```/user``` get current user
 - GET: ```/user/:userId``` get user by Id
 - GET: ```/users/``` find all users
 #### Posts:
-- POST: ```/posts/``` create new post form user ```{title: 'string', body: 'string'}```
+- POST: ```/posts/``` create new post form user 
+```json
+{"title": "string", "body": "string"}
+```
 - GET: ```/posts/:postId``` get posts by Id
 - GET: ```/posts/``` find all posts
+
+## API:
+With Bearer Authorization
+#### Users:
+- GET: ```/api/user``` get current user
+- GET: ```/api/user/:userId``` get user by Id
+- GET: ```/api/users/``` find all users
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

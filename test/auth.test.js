@@ -7,6 +7,8 @@ import app from '../index';
 const dummyUser = {
     email: 'johndoe@gmail.com',
     password: '1234',
+    name: 'Test',
+    lastName: 'LastName',
 };
 
 const userAgent = request.agent(app);
@@ -31,7 +33,7 @@ describe('Create user and login/logout', () => {
     });
 
     // before((done) => {
-    // mongoose.connection.db.dropDatabase(() => done());
+    //     mongoose.connection.db.dropDatabase(() => done());
     // });
 
     beforeEach((done) => {
@@ -75,6 +77,39 @@ describe('Create user and login/logout', () => {
                 expect(res2.status).to.equal(409);
                 done();
             });
+        });
+    });
+
+    it('should not create user if missing name', (done) => {
+        createUser({
+            email: dummyUser.email,
+            lastName: dummyUser.lastName,
+            password: dummyUser.password,
+        }).end((err, res) => {
+            expect(res.status).to.equal(422);
+            done();
+        });
+    });
+
+    it('should not create user if missing lastName', (done) => {
+        createUser({
+            email: dummyUser.email,
+            name: dummyUser.name,
+            password: dummyUser.password,
+        }).end((err, res) => {
+            expect(res.status).to.equal(422);
+            done();
+        });
+    });
+
+    it('should not create user if missing email', (done) => {
+        createUser({
+            lastName: dummyUser.lastName,
+            name: dummyUser.name,
+            password: dummyUser.password,
+        }).end((err, res) => {
+            expect(res.status).to.equal(422);
+            done();
         });
     });
 
@@ -132,6 +167,22 @@ describe('Create user and login/logout', () => {
                 expect(res2.status).to.equal(200);
                 userAgent
                     .get('/user/')
+                    .end((err3, res3) => {
+                        expect(res3.status).to.equal(200);
+                        done();
+                    });
+            });
+        });
+    });
+
+    it('should access get user by id if logged in', (done) => {
+        createUser(dummyUser).end((err1, res1) => {
+            expect(res1.status).to.equal(200);
+            loginUser(dummyUser).end((err2, res2) => {
+                expect(res2.status).to.equal(200);
+                const id = res2.body?.user?._id;
+                userAgent
+                    .get(`/user/${id}`)
                     .end((err3, res3) => {
                         expect(res3.status).to.equal(200);
                         done();

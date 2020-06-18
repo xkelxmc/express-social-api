@@ -5,39 +5,51 @@ import User from '../models/User';
 import asyncHandler from '../middlewares/asyncHandler';
 
 const signUp = asyncHandler(async (req, res, next) => {
-    const {email, password} = req.body;
+    const {email, password, name, lastName} = req.body;
+    if (!name) {
+        return next(Boom.badData('missing name'));
+    }
+    if (!lastName) {
+        return next(Boom.badData('missing lastName'));
+    }
     if (!email || !password) {
         return next(Boom.badData('missing email or password'));
     }
-
-    try {
-        const newUser = new User({email, password});
-        await newUser.save();
-        req.session.userId = newUser._id;
-        return res.json(newUser);
-    } catch (err) {
+    const user = await User.findOne({email} );
+    if (user) {
         return next(Boom.conflict('email already taken'));
+    }
+    try {
+        const newUser = new User({email, password, name, lastName});
+        await newUser.save();
+        const token = await newUser.generateAuthToken();
+        req.session.userId = newUser._id;
+        return res.json({newUser, token});
+    } catch (err) {
+        return next(Boom.badRequest(err.message));
     }
 });
 
 const login = asyncHandler(async (req, res, next) => {
-    const {email, password} = req.body;
-    if (!email || !password) {
-        return next(Boom.badData('missing email or password'));
+    try {
+        const {email, password} = req.body;
+        if (!email || !password) {
+            return next(Boom.badData('missing email or password'));
+        }
+        try {
+            const user = await User.findByCredentials(email, password);
+            if (!user) {
+                return next(Boom.unauthorized('Login failed! Check authentication credentials'));
+            }
+            const token = await user.generateAuthToken();
+            req.session.userId = user._id;
+            return res.json({user, token});
+        } catch (e) {
+            return next(Boom.unauthorized(e));
+        }
+    } catch (error) {
+        return next(Boom.badRequest(error));
     }
-
-    const user = await User.findOne({email});
-    if (!user) {
-        return next(Boom.unauthorized('invalid email or password'));
-    }
-
-    const isValidPassword = await user.comparePassword(password);
-    if (!isValidPassword) {
-        return next(Boom.unauthorized('invalid email or password'));
-    }
-
-    req.session.userId = user._id;
-    return res.json(user);
 });
 
 const logout = (req, res, next) => {
@@ -55,5 +67,5 @@ const logout = (req, res, next) => {
 export default {
     login,
     logout,
-    signup: signUp,
+    signUp,
 };

@@ -18,9 +18,12 @@ const findOne = asyncHandler(async (req, res, next) => {
     const {userId} = req.params;
     try {
         const user = await User.findById(userId);
+        if (!user) {
+            throw new Error();
+        }
         return res.status(200).json(user);
     } catch (err) {
-        return next(Boom.unauthorized('user not found'));
+        return next(Boom.notFound('user not found'));
     }
 });
 

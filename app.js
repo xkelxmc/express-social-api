@@ -6,7 +6,7 @@ mongoose.connect(process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : 
 });
 mongoose.connection
     .once('open', () => {
-        const port = 3012;
+        const port = process.env.PORT || 3012;
         app.listen(port, () => {
             console.log(`App listening on port ${port}`);
         });

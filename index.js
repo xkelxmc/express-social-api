@@ -6,6 +6,7 @@ import commentMongo from 'connect-mongo';
 import authRoutes from './src/routes/auth';
 import usersRouter from './src/routes/users';
 import postsRouter from './src/routes/posts';
+import apiRouter from './src/routes/api/api';
 
 import notFound from './src/middlewares/notFound';
 import errorHandler from './src/middlewares/errorHandler';
@@ -28,6 +29,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(authRoutes);
 app.use(usersRouter);
 app.use(postsRouter);
+app.use('/api/', apiRouter);
 
 app.get('/ping', (req, res, next) => {
     return res.json('pong');
