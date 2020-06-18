@@ -1,0 +1,50 @@
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+
+const {Schema} = mongoose;
+
+const userSchema = new Schema({
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+    },
+    password: {
+        type: String,
+        required: true,
+    },
+    posts: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Post',
+        },
+    ],
+    comments: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Comment',
+        },
+    ],
+});
+
+userSchema.pre('save', async function(next) {
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(this.password, salt);
+        this.password = hashedPassword;
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
+
+userSchema.methods.comparePassword = async function(password) {
+    try {
+        return await bcrypt.compare(password, this.password);
+    } catch (err) {
+        throw new Error(err);
+    }
+};
+
+export default mongoose.model('User', userSchema);
