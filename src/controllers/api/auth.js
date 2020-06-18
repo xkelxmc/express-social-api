@@ -6,19 +6,6 @@ import asyncHandler from '../../middlewares/asyncHandler';
 
 const signUp = asyncHandler(async (req, res, next) => {
     const {email, password, name, lastName} = req.body;
-    if (!name) {
-        return next(Boom.badData('missing name'));
-    }
-    if (!lastName) {
-        return next(Boom.badData('missing lastName'));
-    }
-    if (!email || !password) {
-        return next(Boom.badData('missing email or password'));
-    }
-    const user = await User.findOne({email} );
-    if (user) {
-        return next(Boom.conflict('email already taken'));
-    }
     try {
         const newUser = new User({email, password, name, lastName});
         await newUser.save();

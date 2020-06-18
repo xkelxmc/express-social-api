@@ -4,7 +4,7 @@ import User from '../models/User';
 
 import asyncHandler from '../middlewares/asyncHandler';
 
-const signUp = asyncHandler(async (req, res, next) => {
+const validateSignUp = asyncHandler(async (req, res, next) => {
     const {email, password, name, lastName} = req.body;
     if (!name) {
         return next(Boom.badData('missing name'));
@@ -19,6 +19,11 @@ const signUp = asyncHandler(async (req, res, next) => {
     if (user) {
         return next(Boom.conflict('email already taken'));
     }
+    next();
+});
+
+const signUp = asyncHandler(async (req, res, next) => {
+    const {email, password, name, lastName} = req.body;
     try {
         const newUser = new User({email, password, name, lastName});
         await newUser.save();
@@ -66,4 +71,5 @@ export default {
     login,
     logout,
     signUp,
+    validateSignUp,
 };
