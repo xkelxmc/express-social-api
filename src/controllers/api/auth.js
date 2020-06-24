@@ -43,7 +43,7 @@ const logout = asyncHandler(async (req, res, next) => {
             return token.token !== req.token;
         });
         await req.user.save();
-        return res.status(200).end();
+        return res.json({});
     } catch (error) {
         return next(Boom.internal(error));
     }
@@ -53,7 +53,7 @@ const logoutAll = asyncHandler(async (req, res, next) => {
     try {
         req.user.tokens.splice(0, req.user.tokens.length);
         await req.user.save();
-        return res.status(200).end();
+        return res.json({});
     } catch (error) {
         return next(Boom.internal(error));
     }

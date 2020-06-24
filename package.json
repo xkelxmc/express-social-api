@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --exec node -r dotenv/config -r @babel/register app.js",
+    "start": "node -r dotenv/config -r @babel/register app.js",
+    "watch": "nodemon --exec node -r dotenv/config -r @babel/register app.js",
     "test": "mocha -r @babel/register -r dotenv/config -t 10000 --exit",
     "test:watch": "nodemon --exec mocha -R progress -r @babel/register -r dotenv/config -t 10000 --exit",
     "lint": "eslint src/** app.js index.js test/**",
@@ -39,5 +40,8 @@
     "mocha": "^8.0.1",
     "nodemon": "^2.0.4",
     "supertest": "^4.0.2"
+  },
+  "engines": {
+    "node": "12.18.0"
   }
 }
