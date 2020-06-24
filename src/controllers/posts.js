@@ -20,8 +20,18 @@ const findOne = asyncHandler(async (req, res, next) => {
     }
 });
 
-const createOne = asyncHandler(async (req, res, next) => {
-    const {userId} = req.session;
+const findByUser = asyncHandler(async (req, res, next) => {
+    const {userId} = req.params;
+    try {
+        const posts = await Post.find({author: userId});
+        return res.status(200).json(posts);
+    } catch (err) {
+        return next(Boom.notFound('post not found'));
+    }
+});
+
+const createOne = (type = 'default') => asyncHandler(async (req, res, next) => {
+    const userId = type === 'api' ? req.user._id : req.session.userId;
     const {title, body} = req.body;
     if (!title || !body) {
         return next(Boom.badData('missing title or body'));
@@ -47,4 +57,5 @@ export default {
     createOne,
     findAll,
     findOne,
+    findByUser,
 };

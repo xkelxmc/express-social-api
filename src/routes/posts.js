@@ -8,8 +8,9 @@ const postsRouter = express.Router();
 
 postsRouter.route('/posts')
     .get(requireLogin, postsControllers.findAll)
-    .post(requireLogin, postsControllers.createOne);
+    .post(requireLogin, postsControllers.createOne());
 
+postsRouter.get('/posts/user/:userId', requireLogin, postsControllers.findByUser);
 postsRouter.get('/posts/:postId', requireLogin, postsControllers.findOne);
 
 export default postsRouter;

@@ -66,6 +66,7 @@ SignUp with
 {"title": "string", "body": "string"}
 ```
 - GET: ```/posts/:postId``` get posts by Id
+- GET: ```/posts/user/:userId``` get posts by userId
 - GET: ```/posts/``` find all posts
 
 ## API:
@@ -86,6 +87,14 @@ With Bearer Authorization
 - GET: ```/api/users/me``` get current user
 - GET: ```/api/users/:userId``` get user by Id
 - GET: ```/api/users/``` find all users
+#### Posts:
+- POST: ```/api/posts/``` create new post form user 
+```json
+{"title": "string", "body": "string"}
+```
+- GET: ```/api/posts/:postId``` get posts by Id
+- GET: ```/api/posts/user/:userId``` get posts by userId
+- GET: ```/api/posts/``` find all posts
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
