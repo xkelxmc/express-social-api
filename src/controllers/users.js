@@ -19,7 +19,9 @@ const findOne = asyncHandler(async (req, res, next) => {
         if (!user) {
             throw new Error();
         }
-        return res.status(200).json(user);
+        return res.status(200).json({
+            ...user.toObject(), tokens: [],
+        });
     } catch (err) {
         return next(Boom.notFound('user not found'));
     }
@@ -27,7 +29,10 @@ const findOne = asyncHandler(async (req, res, next) => {
 
 const findAll = asyncHandler(async (req, res) => {
     const users = await User.find();
-    return res.json(users);
+
+    return res.json(users.map((user) => ({
+        ...user.toObject(), tokens: [],
+    })));
 });
 
 export default {
