@@ -68,6 +68,8 @@ SignUp with
 - GET: ```/posts/:postId``` get posts by Id
 - GET: ```/posts/user/:userId``` get posts by userId
 - GET: ```/posts/``` find all posts
+- POST: ```/posts/:postId/up``` upVote post by postId
+- POST: ```/posts/:postId/down``` downVote post by postId
 
 ## API:
 #### Auth:
@@ -95,6 +97,8 @@ With Bearer Authorization
 - GET: ```/api/posts/:postId``` get posts by Id
 - GET: ```/api/posts/user/:userId``` get posts by userId
 - GET: ```/api/posts/``` find all posts
+- POST: ```/api/posts/:postId/up``` upVote post by postId
+- POST: ```/api/posts/:postId/down``` downVote post by postId
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

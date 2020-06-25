@@ -5,7 +5,7 @@ import User from '../models/User';
 import asyncHandler from '../middlewares/asyncHandler';
 
 const validateSignUp = asyncHandler(async (req, res, next) => {
-    const {email, password, name, lastName} = req.body;
+    const { email, password, name, lastName } = req.body;
     if (!name) {
         return next(Boom.badData('missing name'));
     }
@@ -15,7 +15,7 @@ const validateSignUp = asyncHandler(async (req, res, next) => {
     if (!email || !password) {
         return next(Boom.badData('missing email or password'));
     }
-    const user = await User.findOne({email} );
+    const user = await User.findOne({ email });
     if (user) {
         return next(Boom.conflict('email already taken'));
     }
@@ -23,9 +23,9 @@ const validateSignUp = asyncHandler(async (req, res, next) => {
 });
 
 const signUp = asyncHandler(async (req, res, next) => {
-    const {email, password, name, lastName} = req.body;
+    const { email, password, name, lastName } = req.body;
     try {
-        const newUser = new User({email, password, name, lastName});
+        const newUser = new User({ email, password, name, lastName });
         await newUser.save();
         req.session.userId = newUser._id;
         return res.json(newUser);
@@ -36,14 +36,18 @@ const signUp = asyncHandler(async (req, res, next) => {
 
 const login = asyncHandler(async (req, res, next) => {
     try {
-        const {email, password} = req.body;
+        const { email, password } = req.body;
         if (!email || !password) {
             return next(Boom.badData('missing email or password'));
         }
         try {
             const user = await User.findByCredentials(email, password);
             if (!user) {
-                return next(Boom.unauthorized('Login failed! Check authentication credentials'));
+                return next(
+                    Boom.unauthorized(
+                        'Login failed! Check authentication credentials'
+                    )
+                );
             }
             req.session.userId = user._id;
             return res.json(user);

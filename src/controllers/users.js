@@ -3,7 +3,7 @@ import User from '../models/User';
 import asyncHandler from '../middlewares/asyncHandler';
 
 const getCurrentUser = asyncHandler(async (req, res, next) => {
-    const {userId} = req.session;
+    const { userId } = req.session;
     try {
         const user = await User.findById(userId);
         return res.status(200).json(user);
@@ -13,14 +13,15 @@ const getCurrentUser = asyncHandler(async (req, res, next) => {
 });
 
 const findOne = asyncHandler(async (req, res, next) => {
-    const {userId} = req.params;
+    const { userId } = req.params;
     try {
         const user = await User.findById(userId);
         if (!user) {
             throw new Error();
         }
         return res.status(200).json({
-            ...user.toObject(), tokens: [],
+            ...user.toObject(),
+            tokens: [],
         });
     } catch (err) {
         return next(Boom.notFound('user not found'));
@@ -30,9 +31,12 @@ const findOne = asyncHandler(async (req, res, next) => {
 const findAll = asyncHandler(async (req, res) => {
     const users = await User.find();
 
-    return res.json(users.map((user) => ({
-        ...user.toObject(), tokens: [],
-    })));
+    return res.json(
+        users.map((user) => ({
+            ...user.toObject(),
+            tokens: [],
+        }))
+    );
 });
 
 export default {

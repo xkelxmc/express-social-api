@@ -5,12 +5,12 @@ import User from '../../models/User';
 import asyncHandler from '../../middlewares/asyncHandler';
 
 const signUp = asyncHandler(async (req, res, next) => {
-    const {email, password, name, lastName} = req.body;
+    const { email, password, name, lastName } = req.body;
     try {
-        const newUser = new User({email, password, name, lastName});
+        const newUser = new User({ email, password, name, lastName });
         await newUser.save();
         const token = await newUser.generateAuthToken();
-        return res.json({newUser, token});
+        return res.json({ newUser, token });
     } catch (err) {
         return next(Boom.badRequest(err.message));
     }
@@ -18,17 +18,21 @@ const signUp = asyncHandler(async (req, res, next) => {
 
 const login = asyncHandler(async (req, res, next) => {
     try {
-        const {email, password} = req.body;
+        const { email, password } = req.body;
         if (!email || !password) {
             return next(Boom.badData('missing email or password2'));
         }
         try {
             const user = await User.findByCredentials(email, password);
             if (!user) {
-                return next(Boom.unauthorized('Login failed! Check authentication credentials'));
+                return next(
+                    Boom.unauthorized(
+                        'Login failed! Check authentication credentials'
+                    )
+                );
             }
             const token = await user.generateAuthToken();
-            return res.json({user, token});
+            return res.json({ user, token });
         } catch (e) {
             return next(Boom.unauthorized(e));
         }

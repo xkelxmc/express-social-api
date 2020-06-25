@@ -8,7 +8,10 @@ const auth = asyncHandler(async (req, res, next) => {
     try {
         const token = req.header('Authorization').replace('Bearer ', '');
         const data = jwt.verify(token, process.env.JWT_KEY);
-        const user = await User.findOne({'_id': data._id, 'tokens.token': token});
+        const user = await User.findOne({
+            _id: data._id,
+            'tokens.token': token,
+        });
         if (!user) {
             throw new Error();
         }
@@ -16,7 +19,9 @@ const auth = asyncHandler(async (req, res, next) => {
         req.token = token;
         next();
     } catch (error) {
-        return next(Boom.unauthorized('Not authorized to access this resource'));
+        return next(
+            Boom.unauthorized('Not authorized to access this resource')
+        );
     }
 });
 

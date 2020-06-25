@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import validator from 'validator';
 import jwt from 'jsonwebtoken';
 
-const {Schema} = mongoose;
+const { Schema } = mongoose;
 
 const userSchema = new Schema({
     name: {
@@ -23,7 +23,7 @@ const userSchema = new Schema({
         lowercase: true,
         validate: (value) => {
             if (!validator.isEmail(value)) {
-                throw new Error({error: 'Invalid Email address'});
+                throw new Error({ error: 'Invalid Email address' });
             }
         },
     },
@@ -31,12 +31,16 @@ const userSchema = new Schema({
         type: String,
         required: true,
     },
-    tokens: [{
-        token: {
-            type: String,
-            required: true,
+    tokens: [
+        {
+            token: {
+                type: String,
+                required: true,
+            },
         },
-    }],
+    ],
+    upvoters: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
+    downvoters: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
     posts: [
         {
             type: Schema.Types.ObjectId,
@@ -51,7 +55,7 @@ const userSchema = new Schema({
     ],
 });
 
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
     try {
         const user = this;
         if (user.isModified('password')) {
@@ -64,12 +68,12 @@ userSchema.pre('save', async function(next) {
     }
 });
 
-userSchema.methods.generateAuthToken = async function() {
+userSchema.methods.generateAuthToken = async function () {
     try {
         // Generate an auth token for the user
         const user = this;
-        const token = jwt.sign({_id: user._id}, process.env.JWT_KEY);
-        user.tokens = user.tokens.concat({token});
+        const token = jwt.sign({ _id: user._id }, process.env.JWT_KEY);
+        user.tokens = user.tokens.concat({ token });
         await user.save();
         return token;
     } catch (err) {
@@ -80,7 +84,7 @@ userSchema.methods.generateAuthToken = async function() {
 userSchema.statics.findByCredentials = async (email, password) => {
     try {
         // Search for a user by email and password.
-        const user = await User.findOne({email} );
+        const user = await User.findOne({ email });
         if (!user) {
             throw new Error('invalid email or password');
         }

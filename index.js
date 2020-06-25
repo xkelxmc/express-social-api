@@ -14,17 +14,24 @@ import errorHandler from './src/middlewares/errorHandler';
 const app = express();
 const MongoStore = commentMongo(session);
 
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    name: 'sessionId',
-    saveUninitialized: false,
-    resave: true,
-    store: new MongoStore({url: process.env.NODE_ENV === 'test' ? process.env.MONGO_TEST_URI : process.env.MONGO_URI}),
-    cookie: {maxAge: 30 * 24 * 60 * 60 * 1000},
-}));
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        name: 'sessionId',
+        saveUninitialized: false,
+        resave: true,
+        store: new MongoStore({
+            url:
+                process.env.NODE_ENV === 'test'
+                    ? process.env.MONGO_TEST_URI
+                    : process.env.MONGO_URI,
+        }),
+        cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
+    })
+);
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(authRoutes);
 app.use('/users', usersRouter);

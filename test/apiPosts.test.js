@@ -4,6 +4,8 @@ import request from 'supertest';
 
 import app from '../index';
 
+const badToken = 'BadToken';
+
 const dummyUser = {
     email: 'johndoe@gmail.com',
     password: '1234',
@@ -11,7 +13,10 @@ const dummyUser = {
     lastName: 'LastName',
 };
 
-const badToken = 'BadToken';
+const dummyPost = {
+    title: 'Hello, World!',
+    body: 'Hello fellow Node.js developer!',
+};
 
 const userAgent = request.agent(app);
 
@@ -19,7 +24,7 @@ const createUser = (user) => request(app).post('/api/auth/signup').send(user);
 
 const loginUser = (user) => userAgent.post('/api/auth/login').send(user);
 
-describe('API: check users REST', () => {
+describe('API: Get and create posts', () => {
     before((done) => {
         mongoose.connect(process.env.MONGO_TEST_URI, {
             useUnifiedTopology: true,
@@ -31,11 +36,15 @@ describe('API: check users REST', () => {
     });
 
     // before((done) => {
-    //     mongoose.connection.db.dropDatabase(() => done());
+    // mongoose.connection.db.dropDatabase(() => done());
     // });
 
     beforeEach((done) => {
         mongoose.connection.collections.users.drop(() => done());
+    });
+
+    beforeEach((done) => {
+        mongoose.connection.collections.posts.drop(() => done());
     });
 
     beforeEach((done) => {
@@ -48,6 +57,10 @@ describe('API: check users REST', () => {
 
     afterEach((done) => {
         mongoose.connection.collections.users.drop(() => done());
+    });
+
+    afterEach((done) => {
+        mongoose.connection.collections.posts.drop(() => done());
     });
 
     afterEach((done) => {
@@ -60,7 +73,7 @@ describe('API: check users REST', () => {
 
     it('should not access protected ressources if not logged in', (done) => {
         request(app)
-            .get('/api/users')
+            .get('/api/posts')
             .end((err, res) => {
                 expect(res.status).to.equal(401);
                 done();
@@ -69,7 +82,7 @@ describe('API: check users REST', () => {
 
     it('should not access protected ressources with bad token', (done) => {
         request(app)
-            .get('/api/users')
+            .get('/api/posts')
             .set('Authorization', 'Bearer ' + badToken)
             .end((err, res) => {
                 expect(res.status).to.equal(401);
@@ -77,14 +90,14 @@ describe('API: check users REST', () => {
             });
     });
 
-    it('should access current_user if logged in', (done) => {
+    it('should get all posts', (done) => {
         createUser(dummyUser).end((err1, res1) => {
             expect(res1.status).to.equal(200);
             loginUser(dummyUser).end((err2, res2) => {
                 expect(res2.status).to.equal(200);
                 const token = res2.body.token;
                 userAgent
-                    .get('/api/users/')
+                    .get('/api/posts')
                     .set('Authorization', 'Bearer ' + token)
                     .end((err3, res3) => {
                         expect(res3.status).to.equal(200);
@@ -94,57 +107,60 @@ describe('API: check users REST', () => {
         });
     });
 
-    it('should access get user by id if logged in', (done) => {
+    it('should create a post', (done) => {
         createUser(dummyUser).end((err1, res1) => {
             expect(res1.status).to.equal(200);
             loginUser(dummyUser).end((err2, res2) => {
                 expect(res2.status).to.equal(200);
-                const id = res2.body?.user?._id;
                 const token = res2.body.token;
                 userAgent
-                    .get(`/api/users/${id}`)
+                    .post('/api/posts')
                     .set('Authorization', 'Bearer ' + token)
+                    .send(dummyPost)
                     .end((err3, res3) => {
-                        expect(res3.status).to.equal(200);
+                        expect(res3.status).to.equal(201);
                         done();
                     });
             });
         });
     });
 
-    it('should access protected ressources if logged in', (done) => {
+    it('should not create post if missing field', (done) => {
         createUser(dummyUser).end((err1, res1) => {
             expect(res1.status).to.equal(200);
             loginUser(dummyUser).end((err2, res2) => {
                 expect(res2.status).to.equal(200);
                 const token = res2.body.token;
                 userAgent
-                    .get('/api/users')
+                    .post('/api/posts')
                     .set('Authorization', 'Bearer ' + token)
+                    .send({ body: dummyPost.body })
                     .end((err3, res3) => {
-                        expect(res3.status).to.equal(200);
+                        expect(res3.status).to.equal(422);
                         done();
                     });
             });
         });
     });
 
-    it('should logout and not access protected ressources', (done) => {
+    it('should get created post by id', (done) => {
         createUser(dummyUser).end((err1, res1) => {
             expect(res1.status).to.equal(200);
             loginUser(dummyUser).end((err2, res2) => {
                 expect(res2.status).to.equal(200);
                 const token = res2.body.token;
                 userAgent
-                    .get('/api/auth/logout')
+                    .post('/api/posts')
                     .set('Authorization', 'Bearer ' + token)
+                    .send(dummyPost)
                     .end((err3, res3) => {
-                        expect(res3.status).to.equal(200);
+                        expect(res3.status).to.equal(201);
+                        const postId = res3.body._id;
                         userAgent
-                            .get('/api/users')
+                            .get(`/api/posts/${postId}`)
                             .set('Authorization', 'Bearer ' + token)
                             .end((err4, res4) => {
-                                expect(res4.status).to.equal(401);
+                                expect(res4.status).to.equal(200);
                                 done();
                             });
                     });
@@ -152,22 +168,24 @@ describe('API: check users REST', () => {
         });
     });
 
-    it('should logoutall and not access protected ressources', (done) => {
+    it('should up vote created post by id', (done) => {
         createUser(dummyUser).end((err1, res1) => {
             expect(res1.status).to.equal(200);
             loginUser(dummyUser).end((err2, res2) => {
                 expect(res2.status).to.equal(200);
                 const token = res2.body.token;
                 userAgent
-                    .get('/api/auth/logoutall')
+                    .post('/api/posts')
                     .set('Authorization', 'Bearer ' + token)
+                    .send(dummyPost)
                     .end((err3, res3) => {
-                        expect(res3.status).to.equal(200);
+                        expect(res3.status).to.equal(201);
+                        const postId = res3.body._id;
                         userAgent
-                            .get('/api/users')
+                            .post(`/api/posts/${postId}/up`)
                             .set('Authorization', 'Bearer ' + token)
                             .end((err4, res4) => {
-                                expect(res4.status).to.equal(401);
+                                expect(res4.status).to.equal(200);
                                 done();
                             });
                     });
@@ -175,51 +193,107 @@ describe('API: check users REST', () => {
         });
     });
 
-    it('should not send error logged out', (done) => {
+    it('should down vote created post by id', (done) => {
         createUser(dummyUser).end((err1, res1) => {
             expect(res1.status).to.equal(200);
             loginUser(dummyUser).end((err2, res2) => {
                 expect(res2.status).to.equal(200);
                 const token = res2.body.token;
                 userAgent
-                    .get('/api/auth/logout')
+                    .post('/api/posts')
                     .set('Authorization', 'Bearer ' + token)
-                    .end((err, res) => {
-                        expect(res.status).to.equal(200);
-                        done();
+                    .send(dummyPost)
+                    .end((err3, res3) => {
+                        expect(res3.status).to.equal(201);
+                        const postId = res3.body._id;
+                        userAgent
+                            .post(`/api/posts/${postId}/down`)
+                            .set('Authorization', 'Bearer ' + token)
+                            .end((err4, res4) => {
+                                expect(res4.status).to.equal(200);
+                                done();
+                            });
                     });
             });
         });
     });
 
-    it('should not send error logged all', (done) => {
+    it('should not up vote twice created post by id', (done) => {
         createUser(dummyUser).end((err1, res1) => {
             expect(res1.status).to.equal(200);
             loginUser(dummyUser).end((err2, res2) => {
                 expect(res2.status).to.equal(200);
                 const token = res2.body.token;
                 userAgent
-                    .get('/api/auth/logoutall')
+                    .post('/api/posts')
                     .set('Authorization', 'Bearer ' + token)
-                    .end((err, res) => {
-                        expect(res.status).to.equal(200);
-                        done();
+                    .send(dummyPost)
+                    .end((err3, res3) => {
+                        expect(res3.status).to.equal(201);
+                        const postId = res3.body._id;
+                        userAgent
+                            .post(`/api/posts/${postId}/up`)
+                            .set('Authorization', 'Bearer ' + token)
+                            .end((err4, res4) => {
+                                expect(res4.status).to.equal(200);
+                                userAgent
+                                    .post(`/api/posts/${postId}/up`)
+                                    .set('Authorization', 'Bearer ' + token)
+                                    .end((err4, res4) => {
+                                        expect(res4.status).to.equal(400);
+                                        done();
+                                    });
+                            });
                     });
             });
         });
     });
 
-    it('should send 401 error if already logged out', (done) => {
-        userAgent.get('/api/auth/logout').end((err, res) => {
-            expect(res.status).to.equal(401);
-            done();
+    it('should not down vote twice created post by id', (done) => {
+        createUser(dummyUser).end((err1, res1) => {
+            expect(res1.status).to.equal(200);
+            loginUser(dummyUser).end((err2, res2) => {
+                expect(res2.status).to.equal(200);
+                const token = res2.body.token;
+                userAgent
+                    .post('/api/posts')
+                    .set('Authorization', 'Bearer ' + token)
+                    .send(dummyPost)
+                    .end((err3, res3) => {
+                        expect(res3.status).to.equal(201);
+                        const postId = res3.body._id;
+                        userAgent
+                            .post(`/api/posts/${postId}/down`)
+                            .set('Authorization', 'Bearer ' + token)
+                            .end((err4, res4) => {
+                                expect(res4.status).to.equal(200);
+                                userAgent
+                                    .post(`/api/posts/${postId}/down`)
+                                    .set('Authorization', 'Bearer ' + token)
+                                    .end((err4, res4) => {
+                                        expect(res4.status).to.equal(400);
+                                        done();
+                                    });
+                            });
+                    });
+            });
         });
     });
 
-    it('should send 401 error if already logged out', (done) => {
-        userAgent.get('/api/auth/logoutall').end((err, res) => {
-            expect(res.status).to.equal(401);
-            done();
+    it('should not find non-existent post', (done) => {
+        createUser(dummyUser).end((err1, res1) => {
+            expect(res1.status).to.equal(200);
+            loginUser(dummyUser).end((err2, res2) => {
+                expect(res2.status).to.equal(200);
+                const token = res2.body.token;
+                userAgent
+                    .get('/api/posts/1234')
+                    .set('Authorization', 'Bearer ' + token)
+                    .end((err3, res3) => {
+                        expect(res3.status).to.equal(404);
+                        done();
+                    });
+            });
         });
     });
 });

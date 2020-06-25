@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import {expect} from 'chai';
+import { expect } from 'chai';
 import request from 'supertest';
 
 import app from '../index';
@@ -18,13 +18,9 @@ const dummyPost = {
 
 const userAgent = request.agent(app);
 
-const createUser = (user) => request(app)
-    .post('/auth/signup')
-    .send(user);
+const createUser = (user) => request(app).post('/auth/signup').send(user);
 
-const loginUser = (user) => userAgent
-    .post('/auth/login')
-    .send(user);
+const loginUser = (user) => userAgent.post('/auth/login').send(user);
 
 describe('Get and create posts', () => {
     before((done) => {
@@ -50,7 +46,10 @@ describe('Get and create posts', () => {
     });
 
     beforeEach((done) => {
-        mongoose.connection.collections.users.createIndex({email: 1}, {unique: true});
+        mongoose.connection.collections.users.createIndex(
+            { email: 1 },
+            { unique: true }
+        );
         done();
     });
 
@@ -63,8 +62,20 @@ describe('Get and create posts', () => {
     });
 
     afterEach((done) => {
-        mongoose.connection.collections.users.createIndex({email: 1}, {unique: true});
+        mongoose.connection.collections.users.createIndex(
+            { email: 1 },
+            { unique: true }
+        );
         done();
+    });
+
+    it('should not access protected ressources if not logged in', (done) => {
+        request(app)
+            .get('/posts')
+            .end((err, res) => {
+                expect(res.status).to.equal(401);
+                done();
+            });
     });
 
     it('should get all posts', (done) => {
@@ -72,12 +83,10 @@ describe('Get and create posts', () => {
             expect(res1.status).to.equal(200);
             loginUser(dummyUser).end((err2, res2) => {
                 expect(res2.status).to.equal(200);
-                userAgent
-                    .get('/posts')
-                    .end((err3, res3) => {
-                        expect(res3.status).to.equal(200);
-                        done();
-                    });
+                userAgent.get('/posts').end((err3, res3) => {
+                    expect(res3.status).to.equal(200);
+                    done();
+                });
             });
         });
     });
@@ -105,7 +114,7 @@ describe('Get and create posts', () => {
                 expect(res2.status).to.equal(200);
                 userAgent
                     .post('/posts')
-                    .send({body: dummyPost.body})
+                    .send({ body: dummyPost.body })
                     .end((err3, res3) => {
                         expect(res3.status).to.equal(422);
                         done();
@@ -125,11 +134,107 @@ describe('Get and create posts', () => {
                     .end((err3, res3) => {
                         expect(res3.status).to.equal(201);
                         const postId = res3.body._id;
+                        userAgent.get(`/posts/${postId}`).end((err4, res4) => {
+                            expect(res4.status).to.equal(200);
+                            done();
+                        });
+                    });
+            });
+        });
+    });
+
+    it('should up vote created post by id', (done) => {
+        createUser(dummyUser).end((err1, res1) => {
+            expect(res1.status).to.equal(200);
+            loginUser(dummyUser).end((err2, res2) => {
+                expect(res2.status).to.equal(200);
+                userAgent
+                    .post('/posts')
+                    .send(dummyPost)
+                    .end((err3, res3) => {
+                        expect(res3.status).to.equal(201);
+                        const postId = res3.body._id;
                         userAgent
-                            .get(`/posts/${postId}`)
+                            .post(`/posts/${postId}/up`)
                             .end((err4, res4) => {
                                 expect(res4.status).to.equal(200);
                                 done();
+                            });
+                    });
+            });
+        });
+    });
+
+    it('should down vote created post by id', (done) => {
+        createUser(dummyUser).end((err1, res1) => {
+            expect(res1.status).to.equal(200);
+            loginUser(dummyUser).end((err2, res2) => {
+                expect(res2.status).to.equal(200);
+                userAgent
+                    .post('/posts')
+                    .send(dummyPost)
+                    .end((err3, res3) => {
+                        expect(res3.status).to.equal(201);
+                        const postId = res3.body._id;
+                        userAgent
+                            .post(`/posts/${postId}/down`)
+                            .end((err4, res4) => {
+                                expect(res4.status).to.equal(200);
+                                done();
+                            });
+                    });
+            });
+        });
+    });
+
+    it('should not up vote twice created post by id', (done) => {
+        createUser(dummyUser).end((err1, res1) => {
+            expect(res1.status).to.equal(200);
+            loginUser(dummyUser).end((err2, res2) => {
+                expect(res2.status).to.equal(200);
+                userAgent
+                    .post('/posts')
+                    .send(dummyPost)
+                    .end((err3, res3) => {
+                        expect(res3.status).to.equal(201);
+                        const postId = res3.body._id;
+                        userAgent
+                            .post(`/posts/${postId}/up`)
+                            .end((err4, res4) => {
+                                expect(res4.status).to.equal(200);
+                                userAgent
+                                    .post(`/posts/${postId}/up`)
+                                    .end((err4, res4) => {
+                                        expect(res4.status).to.equal(400);
+                                        done();
+                                    });
+                            });
+                    });
+            });
+        });
+    });
+
+    it('should not down vote twice created post by id', (done) => {
+        createUser(dummyUser).end((err1, res1) => {
+            expect(res1.status).to.equal(200);
+            loginUser(dummyUser).end((err2, res2) => {
+                expect(res2.status).to.equal(200);
+                userAgent
+                    .post('/posts')
+                    .send(dummyPost)
+                    .end((err3, res3) => {
+                        expect(res3.status).to.equal(201);
+                        const postId = res3.body._id;
+                        userAgent
+                            .post(`/posts/${postId}/down`)
+                            .end((err4, res4) => {
+                                expect(res4.status).to.equal(200);
+                                userAgent
+                                    .post(`/posts/${postId}/down`)
+                                    .end((err4, res4) => {
+                                        expect(res4.status).to.equal(400);
+                                        done();
+                                    });
                             });
                     });
             });
@@ -141,12 +246,10 @@ describe('Get and create posts', () => {
             expect(res1.status).to.equal(200);
             loginUser(dummyUser).end((err2, res2) => {
                 expect(res2.status).to.equal(200);
-                userAgent
-                    .get('/posts/1234')
-                    .end((err3, res3) => {
-                        expect(res3.status).to.equal(404);
-                        done();
-                    });
+                userAgent.get('/posts/1234').end((err3, res3) => {
+                    expect(res3.status).to.equal(404);
+                    done();
+                });
             });
         });
     });
