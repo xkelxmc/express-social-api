@@ -39,7 +39,7 @@ app.use(postsRouter);
 app.use('/api/', apiRouter);
 
 app.get('/ping', (req, res, next) => {
-    return res.json('pong');
+    return res.json('ping:pong');
 });
 
 app.use(notFound);
